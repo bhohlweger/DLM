@@ -6,11 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "gsl_sf_coulomb.h"
-#include "gsl_sf_bessel.h"
-#include "gsl_sf_legendre.h"
+#include "gsl/gsl_sf_coulomb.h"
+#include "gsl/gsl_sf_bessel.h"
+#include "gsl/gsl_sf_legendre.h"
 
-#include "DLM_CppTools.h"
+#include "DLM_CppTools/DLM_CppTools.h"
 
 using namespace std;
 

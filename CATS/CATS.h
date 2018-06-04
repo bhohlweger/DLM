@@ -12,7 +12,7 @@
 
 #include <stdint.h>
 
-#include "DLM_MergeSort.h"
+#include "DLM_CppTools/DLM_MergeSort.h"
 #include "CATStools.h"
 
 //this typedef it used to save the potentials for the
@@ -255,7 +255,7 @@ public:
 
     //if RadWF==NULL => do not use external wave function. The input should be in u_l = r*R_l
     void UseExternalWaveFunction(const unsigned& uMomBin, const unsigned& usCh, const unsigned& usPW,
-                                 const double* RadWF=NULL, const unsigned& NumRadBins=0, const double* RadBins=NULL, const double& PHASESHIFT=0);
+                                 const double* RadWF=nullptr, const unsigned& NumRadBins=0, const double* RadBins=NULL, const double& PHASESHIFT=0);
 
     //!------------------------------------------------
 

@@ -1,8 +1,8 @@
 #ifndef DLM_ResponseMatrixH
 #define DLM_ResponseMatrixH
 
-#include "CATS.h"
-#include "CATStools.h"
+#include "CATS/CATS.h"
+#include "CATS/CATStools.h"
 
 #include "TH2F.h"
 

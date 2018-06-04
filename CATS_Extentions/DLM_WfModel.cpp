@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "DLM_WfModel.h"
-#include "CATS.h"
+#include "CATS/CATS.h"
 
 using namespace std;
 

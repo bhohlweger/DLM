@@ -3,7 +3,7 @@
 #include <iostream>
 #include <math.h>
 
-#include "DLM_CppTools.h"
+#include "DLM_CppTools/DLM_CppTools.h"
 
 //!Needed only for testing (contains usleep)
 //#include <unistd.h>
