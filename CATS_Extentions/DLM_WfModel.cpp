@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "DLM_WfModel.h"
-#include "CATS.h"
+#include "CATS/CATS.h"
 #ifdef COMPUTER_ID
     #include "main.h"
 #endif // COMPUTER_ID

@@ -1,8 +1,8 @@
 #ifndef DLM_CKDECOMPOSITION_H
 #define DLM_CKDECOMPOSITION_H
 
-#include "CATS.h"
-#include "CATStools.h"
+#include "CATS/CATS.h"
+#include "CATS/CATStools.h"
 #include "DLM_ResponseMatrix.h"
 
 #include "TH2F.h"
