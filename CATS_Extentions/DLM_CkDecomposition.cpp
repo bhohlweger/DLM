@@ -1,6 +1,6 @@
 
 #include "DLM_CkDecomposition.h"
-
+#include <iostream>
 
 #include "DLM_CkModels.h"
 
@@ -171,11 +171,15 @@ printf("%.2f\n",Lednicky_Identical_Singlet(GetBinCenter(uBin), SourcePar, PotPar
 }
 
 //the main contribution does not count as a child, i.e. 1 child implies one contribution additionally to the main one!
-DLM_CkDecomposition::DLM_CkDecomposition(const char* name, const unsigned& numchildren, DLM_Ck& ckfunction, TH2F* hSigmaMatrix, const bool& InvertAxis):
-    ERROR_STATE(!name),NumChildren(numchildren),CkMain(&ckfunction){
-DEBUGFLAG=0;
-    Child = NULL;
-    LambdaPar = NULL;
+DLM_CkDecomposition::DLM_CkDecomposition(
+		const char* name, const unsigned& numchildren, DLM_Ck& ckfunction,
+		TH2F* hSigmaMatrix, const bool& InvertAxis)
+:ERROR_STATE(!name)
+,NumChildren(numchildren)
+,CkMain(&ckfunction){
+	DEBUGFLAG=0;
+	Child = NULL;
+	LambdaPar = NULL;
     Type = NULL;
     RM_Child = NULL;
     RM_MomResolution = NULL;
@@ -190,8 +194,8 @@ DEBUGFLAG=0;
         printf("\033[1;31mERROR:\033[0m The DLM_CkDecomposition got some rubbish input, the object will be broken!\n");
         return;
     }
-
-    RM_MomResolution = new DLM_ResponseMatrix(ckfunction, hSigmaMatrix, NULL, InvertAxis);
+    RM_MomResolution =
+    		new DLM_ResponseMatrix(ckfunction, hSigmaMatrix, nullptr, InvertAxis);
     CkMainFeed = new CATShisto<double>(CkMain[0]);
     CkSmearedMainFeed = new CATShisto<double>(CkMain[0]);
 

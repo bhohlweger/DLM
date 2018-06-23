@@ -1,7 +1,6 @@
 #include "DLM_ResponseMatrix.h"
-
+#include <iostream>
 void DLM_ResponseMatrix::DefaultConstructor(){
-
     //in case we have a resolution matrix, we convert it to
     //the double** format and normalize it
     if(hSigmaMatrix){
@@ -42,7 +41,6 @@ void DLM_ResponseMatrix::DefaultConstructor(){
             SparseResponse[iBin][yAxisFirst] = -1;
             SparseResponse[iBin][yAxisLast] = -1;
         }
-
         for(int iBinY=0; iBinY<NumMomBins; iBinY++){
             for(int iBinX=0; iBinX<NumMomBins; iBinX++){
                 ResponseMatrix[iBinY][iBinX] = 0;
@@ -66,7 +64,6 @@ void DLM_ResponseMatrix::DefaultConstructor(){
             }
         }
     }
-
 }
 
 DLM_ResponseMatrix::DLM_ResponseMatrix(CATS& ab, TH2F* hs, TH2F* hr, const bool& ia):
@@ -79,12 +76,14 @@ DLM_ResponseMatrix::DLM_ResponseMatrix(CATS& ab, TH2F* hs, TH2F* hr, const bool&
     DefaultConstructor();
 }
 
-DLM_ResponseMatrix::DLM_ResponseMatrix(CATShisto<double>& ch, TH2F* hs, TH2F* hr, const bool& ia):
-    hSigmaMatrix(hs),hResidualMatrix(hr),InvertedAxis(ia),NumMomBins(ch.GetNbins()){
-
+DLM_ResponseMatrix::DLM_ResponseMatrix(
+		CATShisto<double>& ch, TH2F* hs, TH2F* hr, const bool& ia)
+:hSigmaMatrix(hs)
+,hResidualMatrix(hr)
+,InvertedAxis(ia)
+,NumMomBins(ch.GetNbins()){
     CatHisto = &ch;
     CatHistoIsMyOwn = false;
-
     DefaultConstructor();
 }
 

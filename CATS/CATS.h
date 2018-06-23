@@ -12,7 +12,7 @@
 
 #include <stdint.h>
 
-#include "DLM_CppTools/DLM_MergeSort.h"
+#include "DLM_MergeSort.h"
 #include "CATStools.h"
 
 //this typedef it used to save the potentials for the

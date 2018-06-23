@@ -1,7 +1,7 @@
 #ifndef DLM_SmearedCatsH
 #define DLM_SmearedCatsH
 
-#include "CATS/CATS.h"
+#include "CATS.h"
 #include "TH2F.h"
 #include "DLM_ResponseMatrix.h"
 
