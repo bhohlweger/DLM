@@ -58,6 +58,8 @@ CATS::CATS():
     ThetaDependentSource = false;
     TransportRenorm = 1;
     PoorManRenorm = 1;
+    SourceMinRad=-1e9;
+    SourceMaxRad=1e9;
     MinTotPairMom = -1;
     MaxTotPairMom = 1e100;
     LoadedMinTotPairMom = -1;
@@ -525,12 +527,21 @@ void CATS::SetMomBins(const unsigned& nummombins, const double* mombins){
             printf("ERROR: Bad input in CATS::SetMomBins(const unsigned& nummombins, const double* mombins)\n");
         return;
     }
+    //check if the momentum bins set are the same as before. If yes, change nothing
+    if(nummombins==NumMomBins){
+        bool SameBinning = true;
+        for(unsigned uMomBin=0; uMomBin<NumMomBins; uMomBin++){
+            SameBinning *= (mombins[uMomBin]==MomBin[uMomBin]);
+        }
+        if(SameBinning) return;
+    }
     if(nummombins!=NumMomBins || !MomBin){
         if(MomBin) {delete[]MomBin; MomBin=NULL;}
         MomBin = new double [nummombins+1];
         DelAllMom();
         NumMomBins = nummombins;
     }
+
     LoadedData = false;
     SourceGridReady = false;
     SourceUpdated = false;
@@ -564,6 +575,9 @@ void CATS::SetMomBins(const unsigned& nummombins, const double& MinMom, const do
             printf("ERROR: Bad input in CATS::SetMomBins(const unsigned& nummombins, const double& MinMom, const double& MaxMom)\n");
         return;
     }
+    //check if the momentum bins set are the same as before. If yes, change nothing
+    double BinWidth = (MaxMom-MinMom)/double(nummombins);
+    if(nummombins==NumMomBins && MomBin[0]==MinMom && MomBin[nummombins]==MinMom+double(nummombins)*BinWidth) return;
     if(nummombins!=NumMomBins || !MomBin){
         if(MomBin) {delete[]MomBin; MomBin=NULL;}
         MomBin = new double [nummombins+1];
@@ -576,9 +590,8 @@ void CATS::SetMomBins(const unsigned& nummombins, const double& MinMom, const do
     ComputedWaveFunction = false;
     ComputedCorrFunction = false;
 
-    double BinWidth = (MaxMom-MinMom)/double(NumMomBins);
     for(unsigned uBin=0; uBin<=NumMomBins; uBin++){
-        MomBin[uBin] = MinMom+uBin*BinWidth;
+        MomBin[uBin] = MinMom+double(uBin)*BinWidth;
     }
 }
 
@@ -885,6 +898,23 @@ void CATS::SetPoorManRenorm(const double& val){
 }
 double CATS::GetPoorManRenorm(){
     return PoorManRenorm;
+}
+
+void CATS::SetSourceMinRange(const double& val){
+    if(SourceMinRad==val) return;
+    if(val>SourceMaxRad) ComputedCorrFunction = false;
+    SourceMinRad = val;
+}
+void CATS::SetSourceMaxRange(const double& val){
+    if(SourceMaxRad==val) return;
+    if(val<SourceMaxRad) ComputedCorrFunction = false;
+    SourceMaxRad = val;
+}
+double CATS::GetSourceMinRange(){
+    return SourceMinRad;
+}
+double CATS::GetSourceMaxRange(){
+    return SourceMaxRad;
 }
 
 void CATS::SetTotPairMomCut(const double& minval, const double& maxval){
@@ -2332,6 +2362,8 @@ void CATS::FoldSourceAndWF(){
     double SourceVal;
     double WaveFunVal;
     double Integrand;
+    double SourceInt;
+    double SourceIntCut;
     for(unsigned uMomBin=0; uMomBin<NumMomBins; uMomBin++){
         kCorrFun[uMomBin] = 0;
         kCorrFunErr[uMomBin] = 0;
@@ -2349,20 +2381,26 @@ void CATS::FoldSourceAndWF(){
             kbCorrFunErr[uMomBin][uIpBin] = 0;
 
             NumGridPts = kbSourceGrid[uMomBin][uIpBin]->GetNumEndNodes();
+            SourceInt = 0;
+            SourceIntCut = 0;
             for(unsigned uGrid=0; uGrid<NumGridPts; uGrid++){
-                //Radius = kbSourceGrid[uMomBin][uIpBin]->GetParValue(uGrid, 0)*FmToNu;
+                double Radius = kbSourceGrid[uMomBin][uIpBin]->GetParValue(uGrid, 0)*FmToNu;
                 //this should return zero in case of !ThetaDependentSource,
                 //maybe worth doing a QA to make sure
                 //CosTheta = kbSourceGrid[uMomBin][uIpBin]->GetParValue(uGrid, 1);
                 SourceVal = kbSourceGrid[uMomBin][uIpBin]->GetGridValue(uGrid);
                 if(!SourceVal) continue;
+                SourceInt += SourceVal;
+                if(Radius<SourceMinRad || Radius>SourceMaxRad) {continue;}
+                SourceIntCut += SourceVal;
                 WaveFunVal=0;
                 for(unsigned usCh=0; usCh<NumCh; usCh++) WaveFunVal+=WaveFunction2[uMomBin][uGrid][usCh]*ChannelWeight[usCh];
                 Integrand = SourceVal*WaveFunVal;
                 kbCorrFun[uMomBin][uIpBin] += Integrand;
                 kbCorrFunErr[uMomBin][uIpBin] += pow(Integrand*kbSourceGrid[uMomBin][uIpBin]->GetGridError(uGrid),2);
             }//uGrid
-            kbCorrFunErr[uMomBin][uIpBin] = sqrt(kbCorrFunErr[uMomBin][uIpBin]);
+            kbCorrFun[uMomBin][uIpBin] *= double(SourceInt)/double(SourceIntCut);
+            kbCorrFunErr[uMomBin][uIpBin] = sqrt(kbCorrFunErr[uMomBin][uIpBin])*double(SourceInt)/double(SourceIntCut);
 
             //in case we use event mixing (data-source have more than a single b-bin), this is how we proceed
             if(MixingDepth>1){
@@ -2379,20 +2417,26 @@ void CATS::FoldSourceAndWF(){
             }
             else{
                 NumGridPts = kSourceGrid[uMomBin]->GetNumEndNodes();
+                SourceInt = 0;
+                SourceIntCut = 0;
                 for(unsigned uGrid=0; uGrid<NumGridPts; uGrid++){
-                    //Radius = kSourceGrid[uMomBin]->GetParValue(uGrid, 0)*FmToNu;
+                    double Radius = kSourceGrid[uMomBin]->GetParValue(uGrid, 0)*FmToNu;
                     //this should return zero in case of !ThetaDependentSource,
                     //maybe worth doing a QA to make sure
                     //CosTheta = kSourceGrid[uMomBin]->GetParValue(uGrid, 1);
                     SourceVal = kSourceGrid[uMomBin]->GetGridValue(uGrid);
                     if(!SourceVal) continue;
+                    SourceInt += SourceVal;
+                    if(Radius<SourceMinRad || Radius>SourceMaxRad) {continue;}
+                    SourceIntCut += SourceVal;
                     WaveFunVal=0;
                     for(unsigned usCh=0; usCh<NumCh; usCh++) WaveFunVal+=WaveFunction2[uMomBin][uGrid][usCh]*ChannelWeight[usCh];
                     Integrand = SourceVal*WaveFunVal;
                     kCorrFun[uMomBin] += Integrand;
                     kCorrFunErr[uMomBin] += pow(Integrand*kSourceGrid[uMomBin]->GetGridError(uGrid),2);
                 }//uGrid
-                kCorrFunErr[uMomBin] = sqrt(kCorrFunErr[uMomBin]);
+                kCorrFun[uMomBin] *= double(SourceInt)/double(SourceIntCut);
+                kCorrFunErr[uMomBin] = sqrt(kCorrFunErr[uMomBin])*double(SourceInt)/double(SourceIntCut);
             }
         }
     }
