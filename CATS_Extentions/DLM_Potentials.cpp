@@ -740,6 +740,22 @@ struct LatticeValuesPaper{
     }
     else return 0;
   }
+  double EvalOperator(const int& DlmPotFlag, const double& IsoSpin, const double& Spin, const double& Rad){
+    int iFlag = DlmPotFlag;
+    if(IsoSpin==0 && Spin==0){
+      return EvalV(iFlag,0,Rad); 
+    }
+    else if(IsoSpin==0 && Spin==1){
+      return EvalV(iFlag,1,Rad); 
+    }
+    else if(IsoSpin==1 && Spin==0){
+      return EvalV(iFlag,2,Rad);
+    }
+    else if(IsoSpin==1 && Spin==1){
+      return EvalV(iFlag,3,Rad);
+    }
+    else return 0;
+  }
 };
 
 //updated version from 1th October 2018
